@@ -20,11 +20,12 @@ Versión publicada: https://claude.ai/artifact/CAuzyGAPypALPkocE7x1WA (artifact 
 8. **Noches de Isa:** días fijos cada semana (1 o 2), configurables por los papás. Las demás cenas las deciden los papás.
 9. **Fotos de productos:** se guardan en el aparato por ahora; pasan a la nube cuando haya sincronización.
 10. **Cobro:** pago único (si se cobra).
-- **Stack para tiendas:** pendiente. Raúl decide después de leer `REPORTE.md`. No construir nada nativo sin su OK.
+- **Stack (decidido el 2026-11-08):** PWA ahora para la familia y después Capacitor para App Store y Play. No reescribir en Expo salvo que Apple la rechace por la guía 4.2.
 
 ## Stack actual
 - Un solo archivo `index.html`: HTML, CSS y JS vanilla, sin build.
-- Fuente: Fredoka (Google Fonts).
+- Fuente: Fredoka variable, empaquetada en `fonts/fredoka.woff2` (licencia OFL en `fonts/OFL.txt`). No cargar nada de terceros (requisito de la Kids Category).
+- PWA: `manifest.webmanifest`, `sw.js` (la página va primero a la red y si no hay internet sale de la caché; lo demás sale de la caché y se actualiza en segundo plano) e íconos en `icons/` (generados desde `icons/icon.svg`). Si agregas archivos que la app necesita sin internet, súmalos a `ARCHIVOS` en `sw.js` y sube `CACHE` (isa-v1 → isa-v2). El service worker solo se registra por http(s), no en file://.
 - Voz: Web Speech API (`speechSynthesis`, es-MX). Lee en voz alta cada opción y cada pregunta.
 - Persistencia: `localStorage`, siempre envuelto en try/catch. Llaves:
   - `isaPant`: `{have:[ingredientes], at:"YYYY-MM-DD"}`. Si es null, la app está bloqueada hasta que los papás revisen la despensa.
@@ -83,4 +84,5 @@ Versión publicada: https://claude.ai/artifact/CAuzyGAPypALPkocE7x1WA (artifact 
 
 ## Cómo probar
 Abre `index.html` en el navegador. Prueba automática: `tests/prueba.cjs` (Playwright, Chromium). Corre en celular claro y oscuro y en tablet horizontal: candado, despensa, foto, preselección, lonche completo, rifa de cenas y noches de Isa. Guarda screenshots en `shots/` (ignorada por git).
+`tests/pwa.cjs` levanta un servidor local (python) y revisa el service worker, que no haya peticiones a terceros, el manifest y que abra sin internet.
 Playwright no está instalado en el repo: instálalo en una carpeta temporal y corre `NODE_PATH=<esa carpeta>/node_modules node tests/prueba.cjs`. Revisa los screenshots antes de entregar. Haz un commit por cada punto terminado.
