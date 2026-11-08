@@ -75,6 +75,24 @@ h1{font-size:30px;margin:6px 0;line-height:1.1}
 .addrow input{flex:1;min-width:140px;border:2px solid var(--acc);border-radius:999px;padding:10px 14px;font:600 16px Fredoka;background:var(--bg);color:var(--ink);outline:none}
 .addrow button{border:0;border-radius:999px;padding:10px 16px;font:700 16px Fredoka;cursor:pointer}
 .addrow .ok{background:var(--acc);color:#fff}.addrow .cx{background:var(--line);color:var(--ink)}
+.wrap{position:relative}
+.lockbtn{position:absolute;top:12px;right:12px;width:48px;height:48px;border-radius:50%;border:0;background:var(--card);color:var(--soft);box-shadow:0 3px 0 var(--line);display:grid;place-items:center;cursor:pointer;touch-action:none;-webkit-touch-callout:none;padding:0;z-index:2}
+.lockbtn>svg.lk{width:22px;height:22px}
+.lockbtn .ring{position:absolute;inset:0;width:48px;height:48px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke:var(--acc);stroke-width:4;stroke-dasharray:132;stroke-dashoffset:132;stroke-linecap:round}
+.lockbtn.hold .ring circle{stroke-dashoffset:0;transition:stroke-dashoffset 3s linear}
+.mdl{position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;z-index:20;padding:16px}
+.mbox{background:var(--card);color:var(--ink);border-radius:26px;padding:22px 20px;max-width:360px;width:100%;text-align:center}
+.mbox h2{margin:0 0 6px;font-size:24px}.mbox p{color:var(--soft);font-size:17px;margin:0 0 12px}
+.sumq{font-size:40px;font-weight:700;margin:4px 0 10px}
+.sumi{width:120px;text-align:center;font:700 34px Fredoka;border:3px solid var(--acc);border-radius:18px;padding:8px;background:var(--bg);color:var(--ink);outline:none}
+.mbox .row{margin-top:16px}.mbox .pill{font-size:19px;padding:13px 22px}
+.gray{background:#8f8f8f!important}
+.mbox.shake{animation:wig .4s}
+.zl{display:grid;gap:12px;margin-bottom:16px}
+.zi{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:0;border-radius:22px;padding:16px 18px;background:var(--card);box-shadow:0 5px 0 var(--line);font:600 20px Fredoka;color:var(--ink);cursor:pointer;text-align:left}
+.zi small{font-weight:500;font-size:15px;color:var(--soft)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:999px;font:600 16px Fredoka;z-index:30;max-width:calc(100% - 32px);text-align:center}
 .sheet{background:#fff;color:#222;border-radius:16px;padding:16px;overflow-x:auto}
 .sh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:3px solid #ff7a2f;padding-bottom:6px;margin-bottom:10px;gap:10px;flex-wrap:wrap}
 .sh h1{font-size:24px;margin:0}.sh span{color:#666;font-size:15px}
@@ -152,20 +170,65 @@ function iso(t){return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0"
 function fecha(s){const d=new Date(s+"T12:00");return d.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"})}
 function nada(){return `<div class="box"><span style="font-size:60px">🛒</span><h1>¡Ups! No hay nada de esto en casa</h1><p style="color:var(--soft);font-size:18px">Pídele a papá o mamá que revisen la despensa.</p>`}
 
+/* ---------- Candado para papás ---------- */
+const LOCKSVG='<svg class="lk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>';
+function armaCandado(){
+  const b=document.getElementById("lk");if(!b)return;let t=null;
+  const fin=()=>{if(t){clearTimeout(t);t=null}b.classList.remove("hold")};
+  b.addEventListener("pointerdown",e=>{e.preventDefault();fin();b.classList.add("hold");t=setTimeout(()=>{t=null;b.classList.remove("hold");pideSuma()},3000)});
+  ["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,fin));
+  b.addEventListener("contextmenu",e=>e.preventDefault());
+}
+function modal(html){let m=document.getElementById("mdl");if(!m){m=document.createElement("div");m.id="mdl";document.body.appendChild(m)}m.className="mdl";m.innerHTML=`<div class="mbox" id="mbox">${html}</div>`}
+function cierraM(){const m=document.getElementById("mdl");if(m)m.remove()}
+let SUMA=0;
+function pideSuma(mal){
+  const a=3+Math.floor(Math.random()*7),b=5+Math.floor(Math.random()*5);SUMA=a+b;
+  modal(`<h2>Para papás</h2><p>${mal?'Esa no es. Intenten con esta:':'Para entrar, resuelvan la suma:'}</p><div class="sumq">${a} + ${b} =</div>
+  <input id="sumi" class="sumi" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" aria-label="Resultado" onkeydown="if(event.key=='Enter')checaSuma()">
+  <div class="row"><button class="pill gray" onclick="cierraM()">Cancelar</button><button class="pill" style="background:var(--acc)" onclick="checaSuma()">Entrar</button></div>`);
+  if(mal)document.getElementById("mbox").classList.add("shake");
+  setTimeout(()=>{const i=document.getElementById("sumi");if(i)i.focus()},60);
+}
+function checaSuma(){const v=parseInt(document.getElementById("sumi").value,10);if(v===SUMA){cierraM();zona()}else pideSuma(1)}
+function toast(t){const e=document.createElement("div");e.className="toast";e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2300)}
+
 function home(){
-  const lock=!P;
-  app.innerHTML=`<div class="hello"><h1>¡Hola, Isa!</h1><p>¿Qué vamos a escoger hoy?</p></div>
-  ${lock?`<div class="note"><b>Papás:</b> antes de que Isa escoja, marquen qué hay en el refri y la despensa. Así solo le salen cosas que sí se pueden hacer.<button class="pill" style="background:var(--ink);margin-top:12px;font-size:18px;padding:12px 20px" onclick="papas()">Revisar despensa</button></div>`:''}
+  const lock=!P;cierraM();
+  app.innerHTML=`<button class="lockbtn" id="lk" aria-label="Para papás: mantener presionado 3 segundos">${LOCKSVG}<svg class="ring" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21"/></svg></button>
+  <div class="hello"><h1>¡Hola, Isa!</h1><p>¿Qué vamos a escoger hoy?</p></div>
+  ${lock?`<div class="note"><b>Papás:</b> antes de que Isa escoja, marquen qué hay en el refri y la despensa. Mantengan presionado el candado de arriba 3 segundos.</div>`:''}
   <div class="home ${lock?'lock':''}">
   <button class="bigbtn" style="background:var(--acc)" onclick="go(()=>{say('Mis lonches');semL()})"><span class="em">🎒</span>Mis lonches</button>
   <button class="bigbtn" style="background:var(--sky)" onclick="go(()=>{say('Desayunos');semana('des')})"><span class="em">🥞</span>Desayunos</button>
   <button class="bigbtn" style="background:var(--snack)" onclick="go(()=>{say('Cenas');semana('cena')})"><span class="em">🌙</span>Cenas</button>
-  </div>
-  <div class="parent"><div class="pbtns"><button onclick="papas()">Para papás</button><button onclick="imprimir()">Imprimir calendario</button></div>${P?`<span>Despensa revisada el ${fecha(P.at)}</span>`:''}</div>`;
+  </div>`;
+  armaCandado();
 }
 function go(f){if(!P){say("Primero papá o mamá revisan la despensa");return}f()}
 
-/* ---------- Para papás ---------- */
+/* ---------- Zona de papás ---------- */
+function zona(){
+  app.innerHTML=hdr("Para papás")+`<div class="pp">
+  <div class="zl">
+    <button class="zi" onclick="papas()">Despensa<small>${P?'Revisada el '+fecha(P.at):'Todavía no la revisan'}</small></button>
+    <button class="zi" onclick="imprimir()">Imprimir calendario<small>Hoja carta horizontal o PDF</small></button>
+  </div>
+  <div class="grp"><div class="gh"><h2>Rifar la semana</h2></div><div class="chips">
+    <button class="chip" onclick="rifa('des')">Rifar desayunos</button><button class="chip" onclick="rifa('cena')">Rifar cenas</button></div></div>
+  <div class="grp"><div class="gh"><h2>Borrar la semana</h2></div><div class="chips">
+    <button class="chip" onclick="borra('L')">Lonches</button><button class="chip" onclick="borra('des')">Desayunos</button><button class="chip" onclick="borra('cena')">Cenas</button></div></div>
+  </div>`;
+  window.scrollTo(0,0);
+}
+function borra(k){
+  const nm={L:"los lonches",des:"los desayunos",cena:"las cenas"}[k];
+  if(!confirm(`¿Borrar ${nm} de toda la semana?`))return;
+  if(k=="L"){L={};guardaL()}else{W[k]={};guarda(k)}
+  toast(`Listo, se borraron ${nm}`);
+}
+
+/* ---------- Despensa ---------- */
 let draft=null,editing=false,adding=-1;
 function papas(){draft=new Set(P?P.have:[]);editing=false;adding=-1;drawPapas();window.scrollTo(0,0)}
 function redraw(){const y=window.scrollY;drawPapas();window.scrollTo(0,y)}
@@ -173,7 +236,7 @@ function drawPapas(){
   const keep=P;P={have:[...draft]};
   const nL=CATS.map(c=>items(c).filter(ok).length),nD=DES.filter(ok).length,nC=CEN.filter(ok).length;P=keep;
   const right=`<button class="editbtn" onclick="editing=!editing;adding=-1;redraw()">${editing?'Listo':'Editar'}</button>`;
-  app.innerHTML=hdr("Para papás","home()",right)+`<div class="pp ${editing?'editing':''}">
+  app.innerHTML=hdr("Despensa","zona()",right)+`<div class="pp ${editing?'editing':''}">
   <p class="lead">${editing?'Toquen la <b>×</b> para quitar algo que ya no compran, o el <b>+</b> para agregar algo nuevo a la categoría.':'¿Qué hay hoy en el refri y la despensa? Toquen lo que sí hay. Isa solo verá lo que se puede hacer con eso.'}</p>
   ${pantry().map(([g,list],gi)=>`<div class="grp"><div class="gh"><h2>${g}</h2><span>${editing
     ?`<button class="plus" onclick="adding=${gi};redraw();setTimeout(()=>{const i=document.getElementById('newi');if(i)i.focus()},30)" aria-label="Agregar a ${g}">+</button>`
@@ -208,7 +271,7 @@ function imprimir(){
   const cell=(list,n)=>n?`<span class="pe">${find(list,n)}</span>${esc(n)}`:'<span class="vac">—</span>';
   const fechas=D.map((d,j)=>{const x=new Date(m);x.setDate(m.getDate()+j);return x.getDate()});
   const lon=k=>D.map((d,j)=>j<5?`<td>${cell(items(CATS.find(c=>c.k==k)),(L[d]||{})[k])}</td>`:'<td class="na"></td>').join("");
-  app.innerHTML=`<div class="noprint">${hdr("Imprimir calendario")}<p class="lead" style="color:var(--soft);font-size:17px;margin:0 0 12px">Toquen el botón y en la ventana elijan su impresora, o <b>Guardar como PDF</b>.</p>
+  app.innerHTML=`<div class="noprint">${hdr("Imprimir calendario","zona()")}<p class="lead" style="color:var(--soft);font-size:17px;margin:0 0 12px">Toquen el botón y en la ventana elijan su impresora, o <b>Guardar como PDF</b>.</p>
   <div class="row" style="justify-content:flex-start;margin:0 0 16px"><button class="pill" style="background:var(--acc)" onclick="window.print()">Imprimir o guardar PDF</button></div></div>
   <div class="sheet"><div class="sh"><h1>Menú de Isa</h1><span>Semana del ${rango}</span></div>
   <table class="cal"><thead><tr><th></th>${D.map((d,j)=>`<th>${d}<small>${fechas[j]}</small></th>`).join("")}</tr></thead><tbody>
@@ -229,8 +292,7 @@ function semL(){
   return `<button class="day" onclick="say('${d}');cur=${j};lonche(0)"><span class="dn" style="background:${DC[j]}">${d.slice(0,2)}</span>
   <span class="tx" style="flex:1">${d}<small>${full?'¡Listo!':'Toca para escoger'}</small></span>
   <span class="mini">${CATS.map(c=>`<span>${x[c.k]?find(items(c),x[c.k]):'·'}</span>`).join("")}</span></button>`}).join("")}</div>
-  <div class="row"><button class="pill" style="background:var(--snack)" onclick="sorpSem()">Sorpresa toda la semana</button>
-  <button class="pill" style="background:#b9a796" onclick="L={};guardaL();semL()">Borrar</button></div>`;
+  <div class="row"><button class="pill" style="background:var(--snack)" onclick="sorpSem()">Sorpresa toda la semana</button></div>`;
 }
 function lonche(s){
   if(s>=CATS.length)return lista();
@@ -258,9 +320,7 @@ function sorpSem(){LD.forEach(d=>{L[d]={};CATS.forEach(c=>{const v=rnd(c);if(v)L
 const lst=m=>m=="des"?DES:CEN;
 function semana(m){
   const list=lst(m),w=W[m];
-  app.innerHTML=hdr(m=="des"?"Desayunos":"Cenas")+`<div class="days" id="dl">${D.map((d,j)=>`<button class="day" onclick="say('${d}');elige('${m}',${j})"><span class="dn" style="background:${DC[j]}">${d.slice(0,2)}</span><span class="em">${w[d]?find(list,w[d]):'❔'}</span><span class="tx">${d}<small>${w[d]||'Toca para escoger'}</small></span></button>`).join("")}</div>
-  <div class="row"><button class="pill" style="background:var(--acc)" onclick="rifa('${m}')">Rifar la semana</button>
-  <button class="pill" style="background:#b9a796" onclick="W['${m}']={};guarda('${m}');semana('${m}')">Borrar</button></div>`;
+  app.innerHTML=hdr(m=="des"?"Desayunos":"Cenas")+`<div class="days" id="dl">${D.map((d,j)=>`<button class="day" onclick="say('${d}');elige('${m}',${j})"><span class="dn" style="background:${DC[j]}">${d.slice(0,2)}</span><span class="em">${w[d]?find(list,w[d]):'❔'}</span><span class="tx">${d}<small>${w[d]||'Toca para escoger'}</small></span></button>`).join("")}</div>`;
 }
 function elige(m,j){
   const av=lst(m).filter(ok),d=D[j],w=W[m];
@@ -270,8 +330,8 @@ function elige(m,j){
 }
 function setDia(m,j,n,el){W[m][D[j]]=n;guarda(m);say(n);el.classList.add("sel");el.style.borderColor=DC[j];setTimeout(()=>semana(m),650)}
 function guarda(m){sv(m=="des"?"isaD2":"isaC2",W[m])}
-function rifa(m){const av=lst(m).filter(ok);if(!av.length){say("No hay nada en casa para esto");return}
+function rifa(m){const av=lst(m).filter(ok);if(!av.length){toast("No hay nada en la despensa para esto");return}
   let p=[];while(p.length<7)p=p.concat([...av].sort(()=>Math.random()-.5));
-  D.forEach((d,i)=>W[m][d]=p[i][0]);guarda(m);semana(m);document.getElementById("dl").classList.add("spin");yay();say("¡Listo! Ya quedó la semana")}
+  D.forEach((d,i)=>W[m][d]=p[i][0]);guarda(m);yay();toast(m=="des"?"Listo, desayunos rifados":"Listo, cenas rifadas")}
 home();
 </script></body></html>
