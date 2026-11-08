@@ -62,6 +62,17 @@ async function corre(nombre, viewport, scheme) {
   await page.click(".zi >> text=Despensa");
   for (const t of await page.locator(".gh button", { hasText: "Todo" }).all()) await t.click();
   await shot("04-despensa");
+  // Foto real para Babybel en modo Editar
+  await page.click("text=Editar");
+  const chip = page.locator(".chip.ed", { hasText: "Babybel" });
+  const [fc] = await Promise.all([page.waitForEvent("filechooser"), chip.locator(".cam").click({ force: true })]);
+  await fc.setFiles(path.join(OUT, `${nombre}-01-inicio-bloqueado.png`));
+  await page.waitForTimeout(600);
+  const fb = await page.evaluate(() => (JSON.parse(localStorage.getItem("isaFotos")) || {}).Babybel || "");
+  ok(fb.startsWith("data:image/jpeg") && fb.length < 60000, `foto guardada y comprimida (${Math.round(fb.length / 1024)} KB)`);
+  ok(await page.locator(".chip.ed", { hasText: "Babybel" }).locator("img.cth").count() === 1, "el chip muestra la miniatura");
+  await shot("04b-editar-foto");
+  await page.click("text=Listo");
   await page.click("text=Guardar y seguir");
   await page.waitForTimeout(200);
   ok(await page.locator("#presel").count() === 1, "después de la despensa abre la preselección");
@@ -71,6 +82,7 @@ async function corre(nombre, viewport, scheme) {
     ok(n >= 3 && n <= 6, `sugerencia de ${k}: ${n} opciones`);
   }
   ok(!Object.values(SEL).flat().includes("Churritos de limón"), "churritos no salen en la sugerencia");
+  ok(await page.locator('[data-k="snack"] .opt', { hasText: "Babybel" }).locator("img.ph").count() === 1, "Babybel sale con su foto en vez del emoji");
   // Tope de 6: intentar marcar todas las frutas
   for (let i = 0; i < 12; i++) {
     const libres = page.locator('[data-k="fruta"] .opt:not(.on)');

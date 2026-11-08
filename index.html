@@ -100,6 +100,11 @@ h1{font-size:30px;margin:6px 0;line-height:1.1}
 .cnt.warn{background:#c2410c}
 .day.off{opacity:.45;box-shadow:none}
 .star{color:var(--llena);font-size:34px;line-height:1;flex:none}
+img.ph{width:1.1em;height:1.1em;object-fit:cover;border-radius:.22em;vertical-align:middle;background:#fff}
+.chip .cam{border:0;background:none;color:inherit;opacity:.75;padding:0 0 0 8px;cursor:pointer;vertical-align:middle;height:24px}
+.chip .cam svg{width:20px;height:20px;vertical-align:middle}
+.chip .cth{width:24px;height:24px;border-radius:7px;object-fit:cover;vertical-align:middle;margin:-4px 6px -4px -4px}
+.fprev{width:160px;height:160px;border-radius:24px;object-fit:cover;margin:4px auto 6px;display:block}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:999px;font:600 16px Fredoka;z-index:30;max-width:calc(100% - 32px);text-align:center}
 .sheet{background:#fff;color:#222;border-radius:16px;padding:16px;overflow-x:auto}
 .sh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:3px solid #ff7a2f;padding-bottom:6px;margin-bottom:10px;gap:10px;flex-wrap:wrap}
@@ -130,6 +135,7 @@ h1{font-size:30px;margin:6px 0;line-height:1.1}
 </style></head><body>
 <div class="wrap" id="app"></div>
 <div class="confetti" id="cf"></div>
+<input type="file" accept="image/*" id="fpick" class="hide" onchange="subeFoto(this)">
 <script>
 const RASP='<svg viewBox="0 0 64 64"><path d="M32 10c-3 0-6 2-7 4 3-1 5 0 7 2 2-2 4-3 7-2-1-2-4-4-7-4z" fill="#3ec97a"/><g fill="#e8345a"><circle cx="24" cy="24" r="7"/><circle cx="34" cy="22" r="7"/><circle cx="43" cy="27" r="7"/><circle cx="20" cy="34" r="7"/><circle cx="30" cy="33" r="7"/><circle cx="41" cy="37" r="7"/><circle cx="25" cy="44" r="7"/><circle cx="35" cy="45" r="7"/><circle cx="31" cy="54" r="6"/></g><g fill="#fff" opacity=".45"><circle cx="22" cy="22" r="2"/><circle cx="32" cy="20" r="2"/><circle cx="28" cy="31" r="2"/><circle cx="23" cy="42" r="2"/></g></svg>';
 const BLK=RASP.replace('#e8345a','#3b1d4a');
@@ -161,7 +167,39 @@ let CU=ld("isaCustom",{add:{},rm:[]});CU.add=CU.add||{};CU.rm=CU.rm||[];
 function guardaCU(){sv("isaCustom",CU)}
 function pantry(){return PANTRY.map(([g,items])=>[g,items.filter(n=>!CU.rm.includes(n)).concat(CU.add[g]||[])])}
 function badge(n,col){return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="${col}"/><text x="32" y="43" text-anchor="middle" font-family="Fredoka,Arial" font-weight="700" font-size="30" fill="#fff">${esc(n.trim().charAt(0).toUpperCase())}</text></svg>`}
-function items(c){return c.g?c.i.concat((CU.add[c.g]||[]).map(n=>[n,badge(n,c.h)])):c.i}
+function items(c){return (c.g?c.i.concat((CU.add[c.g]||[]).map(n=>[n,badge(n,c.h)])):c.i).map(conFoto)}
+
+/* ---------- Fotos reales (se guardan en este aparato) ---------- */
+let FOTO=ld("isaFotos",{});
+const CAMSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+// La foto de una opción: la suya, o la de su único ingrediente (ej. "Barrita Naked" usa la foto de "Barritas Naked").
+function fotoDe(x){const r=x[3]||[x[0]];return FOTO[x[0]]||(r.length==1?FOTO[r[0]]:"")}
+function conFoto(x){const f=fotoDe(x);return f?[x[0],`<img class="ph" src="${f}" alt="">`].concat(x.slice(2)):x}
+let FN="";
+function menuFoto(n){
+  if(!FOTO[n])return pideFoto(n);
+  FN=n;modal(`<h2>${esc(n)}</h2><img class="fprev" src="${FOTO[n]}" alt="">
+  <div class="row"><button class="pill" style="background:var(--acc)" onclick="cierraM();pideFoto(FN)">Cambiar foto</button><button class="pill" style="background:#e5484d" onclick="quitaFoto()">Quitar foto</button></div>
+  <div class="row" style="margin-top:8px"><button class="pill gray" onclick="cierraM()">Cancelar</button></div>`);
+}
+function pideFoto(n){FN=n;const i=document.getElementById("fpick");i.value="";i.click()}
+function quitaFoto(){delete FOTO[FN];sv("isaFotos",FOTO);cierraM();redraw()}
+// Recorta al centro en cuadrado de 240 px y la guarda como JPEG (unos 10-20 KB).
+function subeFoto(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;
+  const url=URL.createObjectURL(f),img=new Image();
+  img.onload=()=>{
+    const S=240,c=document.createElement("canvas"),s=Math.min(img.width,img.height);c.width=c.height=S;
+    const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,S,S);
+    g.drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,S,S);URL.revokeObjectURL(url);
+    FOTO[FN]=c.toDataURL("image/jpeg",.78);
+    try{localStorage.setItem("isaFotos",JSON.stringify(FOTO));toast("Foto guardada")}
+    catch(e){toast("No se pudo guardar en este aparato (¿sin espacio?)")}
+    redraw();
+  };
+  img.onerror=()=>{URL.revokeObjectURL(url);toast("No se pudo abrir esa imagen")};
+  img.src=url;
+}
 
 let L=ld("isaLS",{});for(const d in L)CATS.forEach(c=>{if(L[d][c.k]&&!items(c).some(x=>x[0]==L[d][c.k]))delete L[d][c.k]});
 let W={des:ld("isaD2",{}),cena:ld("isaC2",{})};
@@ -299,13 +337,13 @@ function drawPapas(){
   const nL=CATS.map(c=>items(c).filter(ok).length),nD=DES.filter(ok).length,nC=CEN.filter(ok).length;P=keep;
   const right=`<button class="editbtn" onclick="editing=!editing;adding=-1;redraw()">${editing?'Listo':'Editar'}</button>`;
   app.innerHTML=hdr("Despensa","zona()",right)+`<div class="pp ${editing?'editing':''}">
-  <p class="lead">${editing?'Toquen la <b>×</b> para quitar algo que ya no compran, o el <b>+</b> para agregar algo nuevo a la categoría.':'¿Qué hay hoy en el refri y la despensa? Toquen lo que sí hay. Isa solo verá lo que se puede hacer con eso.'}</p>
+  <p class="lead">${editing?'Toquen la <b>×</b> para quitar algo que ya no compran, el <b>+</b> para agregar algo nuevo, o la cámara para ponerle la foto del producto real.':'¿Qué hay hoy en el refri y la despensa? Toquen lo que sí hay. Isa solo verá lo que se puede hacer con eso.'}</p>
   ${pantry().map(([g,list],gi)=>`<div class="grp"><div class="gh"><h2>${g}</h2><span>${editing
     ?`<button class="plus" onclick="adding=${gi};redraw();setTimeout(()=>{const i=document.getElementById('newi');if(i)i.focus()},30)" aria-label="Agregar a ${g}">+</button>`
     :`<button onclick="todo(${gi},1)">Todo</button><button onclick="todo(${gi},0)">Nada</button>`}</span></div>
   ${editing&&adding==gi?`<div class="addrow"><input id="newi" placeholder="Agregar a ${g}…" maxlength="40" onkeydown="if(event.key=='Enter')agrega(${gi})"><button class="ok" onclick="agrega(${gi})">Agregar</button><button class="cx" onclick="adding=-1;redraw()">Cancelar</button></div>`:''}
   <div class="chips">${list.map(n=>editing
-    ?`<span class="chip ed ${draft.has(n)?'on':''}">${esc(n)}<button class="x" onclick="quita('${js(g)}','${js(n)}')" aria-label="Quitar ${esc(n)}">×</button></span>`
+    ?`<span class="chip ed ${draft.has(n)?'on':''}">${FOTO[n]?`<img class="cth" src="${FOTO[n]}" alt="">`:''}${esc(n)}<button class="cam" onclick="menuFoto('${js(n)}')" aria-label="Foto de ${esc(n)}">${CAMSVG}</button><button class="x" onclick="quita('${js(g)}','${js(n)}')" aria-label="Quitar ${esc(n)}">×</button></span>`
     :`<button class="chip ${draft.has(n)?'on':''}" onclick="tog('${js(n)}')">${esc(n)}</button>`).join("")||'<span style="color:var(--soft)">Vacío</span>'}</div></div>`).join("")}
   ${editing?'':`<div class="sum"><div><b>Con esto, Isa puede escoger:</b><br>Lonche: ${nL[0]} frutas, ${nL[1]} verduras, ${nL[2]} para llenar, ${nL[3]} snacks<br>${nD} desayunos y ${nC} cenas</div>
   <button class="pill" style="background:var(--acc)" onclick="guardaP()">Guardar y seguir</button></div>`}</div>`;
@@ -337,11 +375,11 @@ function imprimir(){
   <div class="row" style="justify-content:flex-start;margin:0 0 16px"><button class="pill" style="background:var(--acc)" onclick="window.print()">Imprimir o guardar PDF</button></div></div>
   <div class="sheet"><div class="sh"><h1>Menú de Isa</h1><span>Semana del ${rango}</span></div>
   <table class="cal"><thead><tr><th></th>${D.map((d,j)=>`<th>${d}<small>${fechas[j]}</small></th>`).join("")}</tr></thead><tbody>
-  <tr><th class="rl">Desayuno</th>${D.map(d=>`<td>${cell(DES,W.des[d])}</td>`).join("")}</tr>
+  <tr><th class="rl">Desayuno</th>${D.map(d=>`<td>${cell(lst("des"),W.des[d])}</td>`).join("")}</tr>
   <tr class="gl"><th class="rl" colspan="8">Lonche</th></tr>
   ${CATS.map(c=>`<tr><th class="rl sub" style="border-left:5px solid ${c.h}">${c.t}</th>${lon(c.k)}</tr>`).join("")}
   <tr class="gl"><th class="rl" colspan="8"></th></tr>
-  <tr><th class="rl">Cena</th>${D.map(d=>`<td>${cell(CEN,W.cena[d])}</td>`).join("")}</tr>
+  <tr><th class="rl">Cena</th>${D.map(d=>`<td>${cell(lst("cena"),W.cena[d])}</td>`).join("")}</tr>
   </tbody></table></div>`;
   window.scrollTo(0,0);
 }
@@ -379,7 +417,7 @@ function rnd(c){const o=paraIsa(c.k,items(c)).filter(x=>!premio(x));return o.len
 function sorpSem(){LD.forEach(d=>{L[d]={};CATS.forEach(c=>{const v=rnd(c);if(v)L[d][c.k]=v})});guardaL();semL();document.getElementById("dl").classList.add("spin");yay();say("¡Sorpresa! Ya quedaron tus lonches de toda la semana")}
 
 /* ---------- Desayunos y cenas ---------- */
-const lst=m=>m=="des"?DES:CEN;
+const lst=m=>(m=="des"?DES:CEN).map(conFoto);
 function semana(m){
   const list=lst(m),w=W[m];
   app.innerHTML=hdr(m=="des"?"Desayunos":"Cenas")+`<div class="days" id="dl">${D.map((d,j)=>{const off=m=="cena"&&!NOCHES.includes(d);
