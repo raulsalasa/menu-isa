@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Menú de Isa</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff7ec;--card:#ffffff;--ink:#3b2a20;--soft:#8a7566;--line:#f1e2d2;
+--fruta:#ff6b6b;--verdura:#3ec97a;--llena:#ffb020;--snack:#a66cff;--acc:#ff7a2f;--sky:#4aa8ff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1712;--card:#2b231c;--ink:#fff3e6;--soft:#c9b5a3;--line:#3d3229}}
+:root[data-theme="dark"]{--bg:#1d1712;--card:#2b231c;--ink:#fff3e6;--soft:#c9b5a3;--line:#3d3229}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Fredoka,Arial,sans-serif;user-select:none}
+.wrap{max-width:760px;margin:auto;padding:16px 16px 40px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.back{width:56px;height:56px;border-radius:50%;border:0;background:var(--card);box-shadow:0 4px 0 var(--line);font-size:28px;cursor:pointer;color:var(--ink);flex:none}
+h1{font-size:30px;margin:6px 0;line-height:1.1}
+.hello{text-align:center;padding:10px 0 18px}
+.hello h1{font-size:40px}.hello p{margin:4px 0;color:var(--soft);font-size:20px}
+.home{display:grid;gap:16px}
+.bigbtn{display:flex;align-items:center;gap:18px;border:0;border-radius:28px;padding:20px 22px;font:700 30px Fredoka;color:#fff;cursor:pointer;text-align:left;box-shadow:0 7px 0 rgba(0,0,0,.18);transition:transform .1s}
+.bigbtn:active,.card:active,.day:active,.pill:active{transform:translateY(4px) scale(.98)}
+.bigbtn .em{font-size:64px;background:rgba(255,255,255,.25);width:96px;height:96px;border-radius:24px;display:grid;place-items:center;flex:none}
+.dots{display:flex;gap:10px;justify-content:center;margin:4px 0 14px}
+.dot{width:46px;height:46px;border-radius:50%;background:var(--card);border:3px dashed var(--line);display:grid;place-items:center;font-size:24px}
+.dot.on{border-style:solid}
+.ask{text-align:center;font-size:32px;margin:4px 0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
+.card{background:var(--card);border:4px solid transparent;border-radius:26px;padding:14px 8px 12px;text-align:center;cursor:pointer;box-shadow:0 6px 0 var(--line);transition:transform .1s}
+.card .em{font-size:68px;line-height:1.1;display:block;height:80px}
+.card .em svg{width:74px;height:74px}
+.card .nm{font-size:19px;font-weight:600;display:block;margin-top:6px;line-height:1.15}
+.card .tg{font-size:14px;color:var(--soft);display:block}
+.card.sel{border-color:var(--acc);animation:pop .35s}
+@keyframes pop{50%{transform:scale(1.08)}}
+.box{background:var(--card);border-radius:32px;padding:20px;text-align:center;box-shadow:0 8px 0 var(--line);margin-top:6px}
+.lonchera{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.slot{border-radius:22px;padding:14px 6px;color:#fff;font-size:18px;font-weight:600}
+.slot .em{font-size:58px;display:block;height:68px}.slot .em svg{width:62px;height:62px}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+.pill{border:0;border-radius:999px;padding:16px 26px;font:700 22px Fredoka;color:#fff;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.18)}
+.days{display:grid;gap:12px}
+.day{display:flex;align-items:center;gap:14px;border:0;border-radius:24px;padding:12px 16px;background:var(--card);box-shadow:0 6px 0 var(--line);cursor:pointer;text-align:left;font-family:Fredoka;color:var(--ink);transition:transform .1s}
+.day .dn{width:64px;height:64px;border-radius:18px;color:#fff;display:grid;place-items:center;font:700 22px Fredoka;flex:none}
+.day .em{font-size:48px;width:60px;text-align:center;flex:none}.day .em svg{width:52px;height:52px}
+.day .tx{font-size:20px;font-weight:600}.day .tx small{display:block;color:var(--soft);font-weight:500;font-size:16px}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9}
+.confetti i{position:absolute;top:-20px;width:12px;height:18px;border-radius:3px;animation:fall 1.6s ease-in forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.spin{animation:wig .5s}@keyframes wig{25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+.hide{display:none}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:2px;font-size:26px;line-height:1.1;text-align:center;flex:none;width:68px;color:var(--soft)}
+.mini svg{width:26px;height:26px}
+.note{background:var(--card);border:3px dashed var(--acc);border-radius:22px;padding:16px 18px;margin-bottom:18px;font-size:18px;line-height:1.35}
+.home.lock{opacity:.4}
+.parent{margin-top:28px;text-align:center;color:var(--soft);font-size:15px}
+.parent button{display:block;margin:0 auto 6px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:10px 22px;font:600 17px Fredoka;cursor:pointer}
+.pp .lead{font-size:18px;color:var(--soft);margin:0 0 10px;line-height:1.35}
+.grp{background:var(--card);border-radius:22px;padding:14px 16px;margin-bottom:14px;box-shadow:0 5px 0 var(--line)}
+.gh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.gh h2{margin:0;font-size:22px}
+.gh button{border:0;background:none;color:var(--acc);font:600 16px Fredoka;cursor:pointer;padding:6px 8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:10px 14px;font:600 16px Fredoka;cursor:pointer}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.sum{position:sticky;bottom:10px;background:var(--card);border-radius:22px;padding:14px 16px;box-shadow:0 6px 20px rgba(0,0,0,.15);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:16px;line-height:1.4}
+.note .pill{display:block}
+.pbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
+.pbtns button{margin:0!important}
+.editbtn{border:0;background:none;color:var(--acc);font:700 20px Fredoka;cursor:pointer;padding:8px 4px}
+.gh .plus{width:38px;height:38px;border-radius:50%;background:var(--acc);color:#fff;font:700 26px/1 Fredoka;padding:0}
+.chip.ed{position:relative;cursor:default;animation:jig .3s infinite alternate;margin:6px 2px 0 6px}
+.chip.ed:nth-child(2n){animation-delay:.15s}
+@keyframes jig{from{transform:rotate(-1.2deg)}to{transform:rotate(1.2deg)}}
+.chip .x{position:absolute;top:-9px;left:-9px;width:24px;height:24px;border-radius:50%;border:2px solid var(--card);background:#e5484d;color:#fff;font:700 16px/1 Arial;padding:0;cursor:pointer;display:grid;place-items:center}
+.addrow{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.addrow input{flex:1;min-width:140px;border:2px solid var(--acc);border-radius:999px;padding:10px 14px;font:600 16px Fredoka;background:var(--bg);color:var(--ink);outline:none}
+.addrow button{border:0;border-radius:999px;padding:10px 16px;font:700 16px Fredoka;cursor:pointer}
+.addrow .ok{background:var(--acc);color:#fff}.addrow .cx{background:var(--line);color:var(--ink)}
+.sheet{background:#fff;color:#222;border-radius:16px;padding:16px;overflow-x:auto}
+.sh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:3px solid #ff7a2f;padding-bottom:6px;margin-bottom:10px;gap:10px;flex-wrap:wrap}
+.sh h1{font-size:24px;margin:0}.sh span{color:#666;font-size:15px}
+.cal{width:100%;border-collapse:collapse;table-layout:fixed;min-width:640px;font-size:12px}
+.cal th,.cal td{border:1px solid #e3e3e3;padding:6px 5px;vertical-align:top;text-align:center;line-height:1.2}
+.cal thead th{background:#ff7a2f;color:#fff;font-size:13px}
+.cal thead th small{display:block;font-weight:500;opacity:.9}
+.cal thead th:first-child{background:#fff;border-color:#fff;width:92px}
+.cal .rl{text-align:left;background:#f4f4f4;font-size:13px;width:92px}
+.cal .rl.sub{font-weight:500;background:#fafafa}
+.cal .gl th{background:#fff;border-left-color:#fff;border-right-color:#fff;padding:8px 0 3px;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:#ff7a2f}
+.cal .na{background:#f7f7f7}
+.cal .pe{display:block;font-size:22px;height:26px}.cal .pe svg{width:24px;height:24px}
+.cal .vac{color:#bbb}
+@media print{
+  @page{size:letter landscape;margin:10mm}
+  html,body{background:#fff!important}
+  .noprint,.confetti{display:none!important}
+  .wrap{max-width:none;padding:0}
+  .sheet{padding:0;border-radius:0;overflow:visible}
+  .cal{min-width:0;font-size:14px}
+  .cal th,.cal td{padding:12px 6px}
+  .cal .pe{font-size:34px;height:40px}.cal .pe svg{width:36px;height:36px}
+  .sh h1{font-size:30px}.sh span{font-size:17px}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style></head><body>
+<div class="wrap" id="app"></div>
+<div class="confetti" id="cf"></div>
+<script>
+const RASP='<svg viewBox="0 0 64 64"><path d="M32 10c-3 0-6 2-7 4 3-1 5 0 7 2 2-2 4-3 7-2-1-2-4-4-7-4z" fill="#3ec97a"/><g fill="#e8345a"><circle cx="24" cy="24" r="7"/><circle cx="34" cy="22" r="7"/><circle cx="43" cy="27" r="7"/><circle cx="20" cy="34" r="7"/><circle cx="30" cy="33" r="7"/><circle cx="41" cy="37" r="7"/><circle cx="25" cy="44" r="7"/><circle cx="35" cy="45" r="7"/><circle cx="31" cy="54" r="6"/></g><g fill="#fff" opacity=".45"><circle cx="22" cy="22" r="2"/><circle cx="32" cy="20" r="2"/><circle cx="28" cy="31" r="2"/><circle cx="23" cy="42" r="2"/></g></svg>';
+const BLK=RASP.replace('#e8345a','#3b1d4a');
+const ALM='<svg viewBox="12 6 40 52"><g transform="rotate(-25 32 32)"><path d="M32 6C20 18 16 34 20 46c3 8 9 12 12 12s9-4 12-12C48 34 44 18 32 6z" fill="#c98b4f"/><path d="M32 12c-3 10-4 24-1 40M26 22c-2 8-2 18 0 28M38 22c2 8 2 18 0 28" stroke="#a96d36" stroke-width="2" fill="none" stroke-linecap="round"/></g></svg>';
+const DAT='<svg viewBox="6 10 52 48"><ellipse cx="22" cy="34" rx="10" ry="20" transform="rotate(-20 22 34)" fill="#6b3a1e"/><ellipse cx="42" cy="34" rx="10" ry="20" transform="rotate(15 42 34)" fill="#7d4524"/><path d="M18 22c2 6 2 18-1 26M40 20c-2 8-1 20 2 28" stroke="#a0623a" stroke-width="2.5" fill="none" stroke-linecap="round"/><ellipse cx="38" cy="24" rx="3" ry="6" fill="#fff" opacity=".25"/></svg>';
+const HAM='<svg viewBox="0 0 64 64"><g transform="rotate(-20 32 32)"><rect x="10" y="22" width="40" height="20" rx="10" fill="#f7a1b0"/><circle cx="50" cy="32" r="10" fill="#ffc4cf"/><path d="M50 32m-6 0a6 6 0 1 1 6 6 3.5 3.5 0 1 1 0-7" stroke="#e46f86" stroke-width="2.5" fill="none"/></g></svg>';
+const PANTRY=[
+["Frutas",["Fresas","Uvas","Manzana","Mandarina","Plátano","Sandía","Mango","Blueberries","Durazno","Frambuesas","Blackberries"]],
+["Verduras",["Pepinito","Brócoli","Elote","Elotitos baby","Aguacate","Papa"]],
+["Refri",["Jamón","Pavo","Queso","Queso panela","Babybel","Yogurt","Leche","Huevo","Jocoque","Crema","Pollo","Carne molida","Carne deshebrada","Res para milanesa","Pescado empanizado","Nuggets","Nuggets de dinosaurio"]],
+["Despensa",["Pan de caja","Bolillo","Pan de hamburguesa","Tortillas de harina","Tortillas de maíz","Tostadas","Gorditas de harina","Harina de hotcakes","Waffles","Arroz","Pasta","Espagueti","Fideo","Sopa de letras","Frijoles","Cereal","Granola","Crema de avellana","Crema de cacahuate","Salsa de tomate","Soya","Masa para empanadas"]],
+["Snacks",["Palomitas","Rice cakes","Muffins","Pretzels","Barritas de granola","Palitos de pan","Galletas Morama","Barritas Naked","Fruit rolls Bear","Almendras","Nueces","Cacahuates","Dátiles","Churritos de limón"]]];
+const CATS=[
+{k:"fruta",t:"Fruta",g:"Frutas",q:"¿Qué fruta quieres?",c:"var(--fruta)",h:"#ff6b6b",i:[["Fresas","🍓"],["Uvas","🍇"],["Manzana","🍎","con limón"],["Mandarina","🍊"],["Plátano","🍌","entero"],["Sandía","🍉"],["Mango","🥭"],["Blueberries","🫐"],["Durazno","🍑"],["Frambuesas",RASP],["Blackberries",BLK]]},
+{k:"verdura",t:"Verdura",g:"Verduras",q:"¿Qué verdura quieres?",c:"var(--verdura)",h:"#3ec97a",i:[["Pepinito","🥒"],["Brócoli con limón","🥦",0,["Brócoli"]],["Elote","🌽"],["Elotitos baby","🌽"]]},
+{k:"llena",t:"Para llenar",q:"¿Qué te llena la pancita?",c:"var(--llena)",h:"#ffb020",i:[["Sándwich de jamón","🥪",0,["Pan de caja","Jamón","Queso"]],["Sándwich de pavo","🥪",0,["Pan de caja","Pavo","Queso"]],["Quesadilla","🫓",0,["Tortillas de harina","Queso"]],["Hotcakes","🥞",0,["Harina de hotcakes"]],["Waffles","🧇"],["Yogurt con fruta","🥣",0,["Yogurt"]],["Rollitos de jamón",HAM,0,["Jamón"]],["Nuggets","🍗"],["Arroz con pollo","🍚",0,["Arroz","Pollo"]],["Pasta","🍝","a veces"],["Queso panela","🧀","a veces"]]},
+{k:"snack",t:"Snack",g:"Snacks",q:"¿Y de snack?",c:"var(--snack)",h:"#a66cff",i:[["Palomitas","🍿"],["Rice cake con avellana","🍘",0,["Rice cakes","Crema de avellana"]],["Muffin de plátano","🧁",0,["Muffins"]],["Pretzels","🥨"],["Barrita de granola","🌾",0,["Barritas de granola"]],["Babybel","🧀"],["Palitos con jocoque","🥖",0,["Palitos de pan","Jocoque"]],["Galletas Morama","🍪"],["Barrita Naked","🍫",0,["Barritas Naked"]],["Fruit rolls Bear","🐻"],["Almendras",ALM],["Nueces","🌰"],["Cacahuates","🥜"],["Dátiles",DAT],["Churritos de limón","🍋","de premio"]]}];
+const DES=[["Hotcakes con fresas","🥞",0,["Harina de hotcakes","Fresas"]],["Hotcakes con plátano","🥞",0,["Harina de hotcakes","Plátano"]],["Waffles con blueberries","🧇",0,["Waffles","Blueberries"]],["Yogurt con granola","🥣",0,["Yogurt","Granola"]],["Quesadilla con aguacate","🫓",0,["Tortillas de harina","Queso","Aguacate"]],["Rice cake con cacahuate","🍘",0,["Rice cakes","Crema de cacahuate"]],["Rice cake con avellana","🍘",0,["Rice cakes","Crema de avellana"]],["Muffin de plátano","🧁",0,["Muffins"]],["Sándwich de pavo","🥪",0,["Pan de caja","Pavo","Queso"]],["Pan francés","🍞",0,["Pan de caja","Huevo","Leche"]],["Cereal con plátano","🥣",0,["Cereal","Leche","Plátano"]],["Molletes","🍞",0,["Bolillo","Frijoles","Queso"]]];
+const CEN=[["Arroz con pollo","🍚",0,["Arroz","Pollo"]],["Nuggets con elote","🍗",0,["Nuggets","Elote"]],["Quesadillas","🫓",0,["Tortillas de harina","Queso"]],["Pasta con pollo","🍝",0,["Pasta","Pollo"]],["Sándwich con jocoque","🥪",0,["Pan de caja","Jamón","Queso","Palitos de pan","Jocoque"]],["Yogurt y Babybel","🥣",0,["Yogurt","Babybel"]],["Taco bar","🌮",0,["Tortillas de maíz","Pollo","Aguacate"]],["Brochetas de pollo","🍢",0,["Pollo","Mango"]],["Sopa de fideo","🍜",0,["Fideo"]],["Molletes","🍞",0,["Bolillo","Frijoles","Queso"]],["Pollito con puré","🍗",0,["Pollo","Papa"]],["Enfrijoladas","🌯",0,["Tortillas de maíz","Frijoles","Queso"]],["Pescadito","🐟",0,["Pescado empanizado"]],["Hamburguesitas","🍔",0,["Carne molida","Pan de hamburguesa"]],["Sopa de letras","🔤",0,["Sopa de letras","Pollo"]],["Tostadas de pollo","🫓",0,["Tostadas","Pollo","Frijoles"]],["Espagueti con albóndigas","🍝",0,["Espagueti","Carne molida","Salsa de tomate"]],["Burritos","🌯",0,["Tortillas de harina","Carne deshebrada","Queso"]],["Flautitas","🌯",0,["Tortillas de maíz","Pollo","Crema"]],["Caldito de pollo","🍲",0,["Pollo","Arroz"]],["Bowl con soya","🥢",0,["Pollo","Arroz","Brócoli","Soya"]],["Empanadas","🥟",0,["Masa para empanadas","Carne molida"]],["Picadillo","🍛",0,["Carne molida","Arroz"]],["Gorditas","🫓",0,["Gorditas de harina","Queso","Frijoles"]],["Milanesa","🥩",0,["Res para milanesa","Arroz"]],["Cereal con plátano","🥣",0,["Cereal","Leche","Plátano"]],["Pan francés","🍞",0,["Pan de caja","Huevo","Leche"]],["Nuggets de dinosaurio","🦕"]];
+const D=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+const DC=["#ff6b6b","#ffb020","#3ec97a","#4aa8ff","#a66cff","#ff7ab6","#ff7a2f"];
+function ld(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+const esc=s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const js=s=>esc(String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'"));
+
+/* ---------- Categorías editables ---------- */
+let CU=ld("isaCustom",{add:{},rm:[]});CU.add=CU.add||{};CU.rm=CU.rm||[];
+function guardaCU(){sv("isaCustom",CU)}
+function pantry(){return PANTRY.map(([g,items])=>[g,items.filter(n=>!CU.rm.includes(n)).concat(CU.add[g]||[])])}
+function badge(n,col){return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="${col}"/><text x="32" y="43" text-anchor="middle" font-family="Fredoka,Arial" font-weight="700" font-size="30" fill="#fff">${esc(n.trim().charAt(0).toUpperCase())}</text></svg>`}
+function items(c){return c.g?c.i.concat((CU.add[c.g]||[]).map(n=>[n,badge(n,c.h)])):c.i}
+
+let L=ld("isaLS",{});for(const d in L)CATS.forEach(c=>{if(L[d][c.k]&&!items(c).some(x=>x[0]==L[d][c.k]))delete L[d][c.k]});
+let W={des:ld("isaD2",{}),cena:ld("isaC2",{})};
+let P=ld("isaPant",null);
+const app=document.getElementById("app");
+const has=n=>!!P&&P.have.includes(n)&&!CU.rm.includes(n);
+const req=x=>x[3]||[x[0]];
+const ok=x=>req(x).every(has);
+function say(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="es-MX";u.rate=.95;u.pitch=1.15;speechSynthesis.speak(u)}catch(e){}}
+function yay(){const cf=document.getElementById("cf");cf.innerHTML="";const cols=["#ff6b6b","#ffb020","#3ec97a","#4aa8ff","#a66cff","#ff7ab6"];for(let n=0;n<70;n++){const i=document.createElement("i");i.style.left=Math.random()*100+"vw";i.style.background=cols[n%6];i.style.animationDelay=Math.random()*.6+"s";cf.appendChild(i)}setTimeout(()=>cf.innerHTML="",2400)}
+function find(list,n){const x=list.find(a=>a[0]==n);return x?x[1]:"❓"}
+function hdr(title,back,right){return `<div class="top"><button class="back" onclick="${back||'home()'}" aria-label="Regresar">⬅</button><h1 style="flex:1">${title}</h1>${right||''}</div>`}
+function iso(t){return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0")}
+function fecha(s){const d=new Date(s+"T12:00");return d.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"})}
+function nada(){return `<div class="box"><span style="font-size:60px">🛒</span><h1>¡Ups! No hay nada de esto en casa</h1><p style="color:var(--soft);font-size:18px">Pídele a papá o mamá que revisen la despensa.</p>`}
+
+function home(){
+  const lock=!P;
+  app.innerHTML=`<div class="hello"><h1>¡Hola, Isa!</h1><p>¿Qué vamos a escoger hoy?</p></div>
+  ${lock?`<div class="note"><b>Papás:</b> antes de que Isa escoja, marquen qué hay en el refri y la despensa. Así solo le salen cosas que sí se pueden hacer.<button class="pill" style="background:var(--ink);margin-top:12px;font-size:18px;padding:12px 20px" onclick="papas()">Revisar despensa</button></div>`:''}
+  <div class="home ${lock?'lock':''}">
+  <button class="bigbtn" style="background:var(--acc)" onclick="go(()=>{say('Mis lonches');semL()})"><span class="em">🎒</span>Mis lonches</button>
+  <button class="bigbtn" style="background:var(--sky)" onclick="go(()=>{say('Desayunos');semana('des')})"><span class="em">🥞</span>Desayunos</button>
+  <button class="bigbtn" style="background:var(--snack)" onclick="go(()=>{say('Cenas');semana('cena')})"><span class="em">🌙</span>Cenas</button>
+  </div>
+  <div class="parent"><div class="pbtns"><button onclick="papas()">Para papás</button><button onclick="imprimir()">Imprimir calendario</button></div>${P?`<span>Despensa revisada el ${fecha(P.at)}</span>`:''}</div>`;
+}
+function go(f){if(!P){say("Primero papá o mamá revisan la despensa");return}f()}
+
+/* ---------- Para papás ---------- */
+let draft=null,editing=false,adding=-1;
+function papas(){draft=new Set(P?P.have:[]);editing=false;adding=-1;drawPapas();window.scrollTo(0,0)}
+function redraw(){const y=window.scrollY;drawPapas();window.scrollTo(0,y)}
+function drawPapas(){
+  const keep=P;P={have:[...draft]};
+  const nL=CATS.map(c=>items(c).filter(ok).length),nD=DES.filter(ok).length,nC=CEN.filter(ok).length;P=keep;
+  const right=`<button class="editbtn" onclick="editing=!editing;adding=-1;redraw()">${editing?'Listo':'Editar'}</button>`;
+  app.innerHTML=hdr("Para papás","home()",right)+`<div class="pp ${editing?'editing':''}">
+  <p class="lead">${editing?'Toquen la <b>×</b> para quitar algo que ya no compran, o el <b>+</b> para agregar algo nuevo a la categoría.':'¿Qué hay hoy en el refri y la despensa? Toquen lo que sí hay. Isa solo verá lo que se puede hacer con eso.'}</p>
+  ${pantry().map(([g,list],gi)=>`<div class="grp"><div class="gh"><h2>${g}</h2><span>${editing
+    ?`<button class="plus" onclick="adding=${gi};redraw();setTimeout(()=>{const i=document.getElementById('newi');if(i)i.focus()},30)" aria-label="Agregar a ${g}">+</button>`
+    :`<button onclick="todo(${gi},1)">Todo</button><button onclick="todo(${gi},0)">Nada</button>`}</span></div>
+  ${editing&&adding==gi?`<div class="addrow"><input id="newi" placeholder="Agregar a ${g}…" maxlength="40" onkeydown="if(event.key=='Enter')agrega(${gi})"><button class="ok" onclick="agrega(${gi})">Agregar</button><button class="cx" onclick="adding=-1;redraw()">Cancelar</button></div>`:''}
+  <div class="chips">${list.map(n=>editing
+    ?`<span class="chip ed ${draft.has(n)?'on':''}">${esc(n)}<button class="x" onclick="quita('${js(g)}','${js(n)}')" aria-label="Quitar ${esc(n)}">×</button></span>`
+    :`<button class="chip ${draft.has(n)?'on':''}" onclick="tog('${js(n)}')">${esc(n)}</button>`).join("")||'<span style="color:var(--soft)">Vacío</span>'}</div></div>`).join("")}
+  ${editing?'':`<div class="sum"><div><b>Con esto, Isa puede escoger:</b><br>Lonche: ${nL[0]} frutas, ${nL[1]} verduras, ${nL[2]} para llenar, ${nL[3]} snacks<br>${nD} desayunos y ${nC} cenas</div>
+  <button class="pill" style="background:var(--acc)" onclick="guardaP()">Listo, ¡a escoger!</button></div>`}</div>`;
+}
+function tog(n){draft.has(n)?draft.delete(n):draft.add(n);redraw()}
+function todo(gi,on){pantry()[gi][1].forEach(n=>on?draft.add(n):draft.delete(n));redraw()}
+function quita(g,n){
+  if(CU.add[g]&&CU.add[g].includes(n))CU.add[g]=CU.add[g].filter(x=>x!=n);else if(!CU.rm.includes(n))CU.rm.push(n);
+  draft.delete(n);guardaCU();redraw();
+}
+function agrega(gi){
+  const el=document.getElementById("newi"),n=(el.value||"").trim().replace(/\s+/g," ");if(!n)return;
+  const g=PANTRY[gi][0],all=pantry().flatMap(x=>x[1]).map(x=>x.toLowerCase());
+  if(CU.rm.includes(n)&&PANTRY[gi][1].includes(n))CU.rm=CU.rm.filter(x=>x!=n);
+  else if(!all.includes(n.toLowerCase())){(CU.add[g]=CU.add[g]||[]).push(n)}
+  draft.add(n);guardaCU();adding=-1;redraw();
+}
+function guardaP(){P={have:[...draft],at:iso(new Date())};sv("isaPant",P);home();window.scrollTo(0,0)}
+
+/* ---------- Imprimir ---------- */
+function lunesSemana(){const t=new Date();t.setHours(12);const dw=(t.getDay()+6)%7;if(dw>=5)t.setDate(t.getDate()+7-dw);else t.setDate(t.getDate()-dw);return t}
+function imprimir(){
+  const m=lunesSemana(),f=new Date(m);f.setDate(m.getDate()+6);
+  const rango=m.getMonth()==f.getMonth()?`${m.getDate()} al ${f.getDate()} de ${f.toLocaleDateString("es-MX",{month:"long"})}`:`${m.toLocaleDateString("es-MX",{day:"numeric",month:"long"})} al ${f.toLocaleDateString("es-MX",{day:"numeric",month:"long"})}`;
+  const cell=(list,n)=>n?`<span class="pe">${find(list,n)}</span>${esc(n)}`:'<span class="vac">—</span>';
+  const fechas=D.map((d,j)=>{const x=new Date(m);x.setDate(m.getDate()+j);return x.getDate()});
+  const lon=k=>D.map((d,j)=>j<5?`<td>${cell(items(CATS.find(c=>c.k==k)),(L[d]||{})[k])}</td>`:'<td class="na"></td>').join("");
+  app.innerHTML=`<div class="noprint">${hdr("Imprimir calendario")}<p class="lead" style="color:var(--soft);font-size:17px;margin:0 0 12px">Toquen el botón y en la ventana elijan su impresora, o <b>Guardar como PDF</b>.</p>
+  <div class="row" style="justify-content:flex-start;margin:0 0 16px"><button class="pill" style="background:var(--acc)" onclick="window.print()">Imprimir o guardar PDF</button></div></div>
+  <div class="sheet"><div class="sh"><h1>Menú de Isa</h1><span>Semana del ${rango}</span></div>
+  <table class="cal"><thead><tr><th></th>${D.map((d,j)=>`<th>${d}<small>${fechas[j]}</small></th>`).join("")}</tr></thead><tbody>
+  <tr><th class="rl">Desayuno</th>${D.map(d=>`<td>${cell(DES,W.des[d])}</td>`).join("")}</tr>
+  <tr class="gl"><th class="rl" colspan="8">Lonche</th></tr>
+  ${CATS.map(c=>`<tr><th class="rl sub" style="border-left:5px solid ${c.h}">${c.t}</th>${lon(c.k)}</tr>`).join("")}
+  <tr class="gl"><th class="rl" colspan="8"></th></tr>
+  <tr><th class="rl">Cena</th>${D.map(d=>`<td>${cell(CEN,W.cena[d])}</td>`).join("")}</tr>
+  </tbody></table></div>`;
+  window.scrollTo(0,0);
+}
+
+/* ---------- Lonches ---------- */
+const LD=D.slice(0,5);let cur=0;
+function guardaL(){sv("isaLS",L)}
+function semL(){
+  app.innerHTML=hdr("Mis lonches")+`<div class="days" id="dl">${LD.map((d,j)=>{const x=L[d]||{},full=CATS.every(c=>x[c.k]);
+  return `<button class="day" onclick="say('${d}');cur=${j};lonche(0)"><span class="dn" style="background:${DC[j]}">${d.slice(0,2)}</span>
+  <span class="tx" style="flex:1">${d}<small>${full?'¡Listo!':'Toca para escoger'}</small></span>
+  <span class="mini">${CATS.map(c=>`<span>${x[c.k]?find(items(c),x[c.k]):'·'}</span>`).join("")}</span></button>`}).join("")}</div>
+  <div class="row"><button class="pill" style="background:var(--snack)" onclick="sorpSem()">Sorpresa toda la semana</button>
+  <button class="pill" style="background:#b9a796" onclick="L={};guardaL();semL()">Borrar</button></div>`;
+}
+function lonche(s){
+  if(s>=CATS.length)return lista();
+  const c=CATS[s],d=LD[cur],x=L[d]||(L[d]={}),av=items(c).filter(ok);
+  const dots=CATS.map(y=>`<div class="dot ${x[y.k]?'on':''}" style="border-color:${y.c}">${x[y.k]?find(items(y),x[y.k]):''}</div>`).join("");
+  app.innerHTML=hdr(`<span style="color:${DC[cur]}">Lonche del ${d}</span>`,"semL()")+`<div class="dots">${dots}</div><div class="ask" style="color:${c.c}">${c.q}</div>
+  ${av.length?`<div class="grid">${av.map(([n,e,t])=>`<div class="card ${x[c.k]==n?'sel':''}" style="${x[c.k]==n?'border-color:'+c.c:''}" onclick="pick(${s},'${js(n)}',this)"><span class="em">${e}</span><span class="nm">${esc(n)}</span>${t?`<span class="tg">${t}</span>`:''}</div>`).join("")}</div>`
+  :nada()+`<button class="pill" style="background:${c.c}" onclick="delete L['${d}']['${c.k}'];lonche(${s+1})">Seguir sin ${c.t.toLowerCase()}</button></div>`}`;
+  say((s==0?"Lonche del "+d+". ":"")+(av.length?c.q:"No hay "+c.t.toLowerCase()+" en casa"));
+}
+function pick(s,n,el){L[LD[cur]][CATS[s].k]=n;guardaL();say(n);el.classList.add("sel");el.style.borderColor=CATS[s].c;setTimeout(()=>lonche(s+1),650)}
+function lista(){
+  const d=LD[cur],x=L[d],sig=LD.findIndex(k=>!CATS.every(c=>(L[k]||{})[c.k]));
+  const nx=sig>=0&&sig!=cur?sig:-1;
+  app.innerHTML=hdr(`<span style="color:${DC[cur]}">${d}</span>`,"semL()")+`<div class="box"><h1>¡Tu lonche está listo!</h1>
+  <div class="lonchera">${CATS.map(c=>`<div class="slot" style="background:${c.c}"><span class="em">${x[c.k]?find(items(c),x[c.k]):'—'}</span>${x[c.k]?esc(x[c.k]):'Sin '+c.t.toLowerCase()}</div>`).join("")}</div>
+  <div class="row">${nx>=0?`<button class="pill" style="background:${DC[nx]}" onclick="cur=${nx};lonche(0)">Sigue el ${LD[nx]}</button>`:''}
+  <button class="pill" style="background:var(--sky)" onclick="semL()">Ver mi semana</button></div></div>`;
+  yay();say("¡Tu lonche del "+d+" está listo!"+(nx>=0?" Ahora vamos con el "+LD[nx]:""));
+}
+function rnd(c){const o=items(c).filter(x=>x[2]!="de premio"&&ok(x));return o.length?o[Math.floor(Math.random()*o.length)][0]:null}
+function sorpSem(){LD.forEach(d=>{L[d]={};CATS.forEach(c=>{const v=rnd(c);if(v)L[d][c.k]=v})});guardaL();semL();document.getElementById("dl").classList.add("spin");yay();say("¡Sorpresa! Ya quedaron tus lonches de toda la semana")}
+
+/* ---------- Desayunos y cenas ---------- */
+const lst=m=>m=="des"?DES:CEN;
+function semana(m){
+  const list=lst(m),w=W[m];
+  app.innerHTML=hdr(m=="des"?"Desayunos":"Cenas")+`<div class="days" id="dl">${D.map((d,j)=>`<button class="day" onclick="say('${d}');elige('${m}',${j})"><span class="dn" style="background:${DC[j]}">${d.slice(0,2)}</span><span class="em">${w[d]?find(list,w[d]):'❔'}</span><span class="tx">${d}<small>${w[d]||'Toca para escoger'}</small></span></button>`).join("")}</div>
+  <div class="row"><button class="pill" style="background:var(--acc)" onclick="rifa('${m}')">Rifar la semana</button>
+  <button class="pill" style="background:#b9a796" onclick="W['${m}']={};guarda('${m}');semana('${m}')">Borrar</button></div>`;
+}
+function elige(m,j){
+  const av=lst(m).filter(ok),d=D[j],w=W[m];
+  app.innerHTML=hdr(`<span style="color:${DC[j]}">${d}</span>`,`semana('${m}')`)+`<div class="ask">${m=="des"?"¿Qué desayunamos?":"¿Qué cenamos?"}</div>
+  ${av.length?`<div class="grid">${av.map(([n,e])=>`<div class="card ${w[d]==n?'sel':''}" style="${w[d]==n?'border-color:'+DC[j]:''}" onclick="setDia('${m}',${j},'${n}',this)"><span class="em">${e}</span><span class="nm">${n}</span></div>`).join("")}</div>`:nada()+`</div>`}`;
+  say(av.length?(m=="des"?"¿Qué desayunamos el "+d+"?":"¿Qué cenamos el "+d+"?"):"No hay nada en casa para esto");
+}
+function setDia(m,j,n,el){W[m][D[j]]=n;guarda(m);say(n);el.classList.add("sel");el.style.borderColor=DC[j];setTimeout(()=>semana(m),650)}
+function guarda(m){sv(m=="des"?"isaD2":"isaC2",W[m])}
+function rifa(m){const av=lst(m).filter(ok);if(!av.length){say("No hay nada en casa para esto");return}
+  let p=[];while(p.length<7)p=p.concat([...av].sort(()=>Math.random()-.5));
+  D.forEach((d,i)=>W[m][d]=p[i][0]);guarda(m);semana(m);document.getElementById("dl").classList.add("spin");yay();say("¡Listo! Ya quedó la semana")}
+home();
+</script></body></html>
