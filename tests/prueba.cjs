@@ -62,16 +62,35 @@ async function corre(nombre, viewport, scheme) {
   await page.click(".zi >> text=Despensa");
   for (const t of await page.locator(".gh button", { hasText: "Todo" }).all()) await t.click();
   await shot("04-despensa");
-  await page.click("text=Listo, ¡a escoger!");
+  await page.click("text=Guardar y seguir");
   await page.waitForTimeout(200);
-  if (await page.locator("#presel").count()) { await shot("05-preseleccion"); await page.click("#presel-listo"); }
+  ok(await page.locator("#presel").count() === 1, "después de la despensa abre la preselección");
+  const SEL = await page.evaluate(() => JSON.parse(localStorage.getItem("isaSel")));
+  for (const k of ["fruta", "verdura", "llena", "snack", "des", "cena"]) {
+    const n = (SEL[k] || []).length;
+    ok(n >= 3 && n <= 6, `sugerencia de ${k}: ${n} opciones`);
+  }
+  ok(!Object.values(SEL).flat().includes("Churritos de limón"), "churritos no salen en la sugerencia");
+  // Tope de 6: intentar marcar todas las frutas
+  for (let i = 0; i < 12; i++) {
+    const libres = page.locator('[data-k="fruta"] .opt:not(.on)');
+    if (!(await libres.count())) break;
+    await libres.first().click();
+  }
+  ok(await page.locator('[data-k="fruta"] .opt.on').count() === 6, "máximo 6 frutas");
+  await shot("05-preseleccion");
+  await page.click("#presel-listo");
   ok(await page.locator(".bigbtn").count() === 3, "regresa al inicio");
   await shot("06-inicio");
 
   // Lonche completo del lunes
   await page.click("text=Mis lonches");
   await page.locator(".day").first().click();
-  for (let s = 0; s < 4; s++) { await page.locator(".card").first().click(); await page.waitForTimeout(900); }
+  ok(await page.locator(".card").count() === 6, "Isa ve solo las 6 frutas preseleccionadas");
+  for (let s = 0; s < 4; s++) {
+    if (s == 1) ok((await page.locator(".card").count()) <= 6, "verduras limitadas a la preselección");
+    await page.locator(".card").first().click(); await page.waitForTimeout(900);
+  }
   ok((await page.textContent("h1:has-text('lonche está listo')")) !== null, "lonche completo armado");
   await shot("07-lonche-listo");
   const LS = await page.evaluate(() => JSON.parse(localStorage.getItem("isaLS")));
@@ -83,7 +102,21 @@ async function corre(nombre, viewport, scheme) {
   await page.click("text=Rifar cenas");
   const C = await page.evaluate(() => JSON.parse(localStorage.getItem("isaC2")));
   const nC = C ? Object.keys(C).length : 0;
-  ok(nC >= 5, `cenas rifadas (${nC} días)`);
+  ok(nC === 5 && !C.Viernes && !C.Domingo, `cenas de papás rifadas (${nC} días, sin viernes ni domingo)`);
+  await shot("08-zona-lista");
+  await page.click(".zi >> text=Cenas de la semana");
+  await page.locator(".day").nth(4).click();
+  await page.locator(".card").first().click(); await page.waitForTimeout(400);
+  const C2 = await page.evaluate(() => JSON.parse(localStorage.getItem("isaC2")));
+  ok(!!C2.Viernes, "papás pueden escoger también una noche de Isa");
+  await shot("09-cenas-papas");
+  await page.click(".back"); await page.click(".back");
+  await page.click("text=Cenas");
+  ok(await page.locator(".day.off").count() === 5, "Isa solo puede escoger sus 2 noches");
+  await page.locator(".day").nth(6).click();
+  ok(await page.locator(".card").count() <= 6, "cenas de Isa limitadas a la preselección");
+  await page.click(".back");
+  await shot("10-cenas-isa");
   const extra = global.extra ? await global.extra(page, shot, ok) : null;
 
   ok(errores.length === 0, "sin errores de JS" + (errores.length ? ": " + errores.join(" | ") : ""));

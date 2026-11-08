@@ -92,6 +92,14 @@ h1{font-size:30px;margin:6px 0;line-height:1.1}
 .zl{display:grid;gap:12px;margin-bottom:16px}
 .zi{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:0;border-radius:22px;padding:16px 18px;background:var(--card);box-shadow:0 5px 0 var(--line);font:600 20px Fredoka;color:var(--ink);cursor:pointer;text-align:left}
 .zi small{font-weight:500;font-size:15px;color:var(--soft)}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}
+.opt{border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:18px;padding:8px 6px 10px;font:600 14px/1.15 Fredoka;cursor:pointer;opacity:.55}
+.opt .em{display:block;font-size:36px;height:44px;line-height:44px}.opt .em svg{width:38px;height:38px}
+.opt.on{opacity:1;border-color:var(--acc);box-shadow:inset 0 0 0 2px var(--acc)}
+.cnt{display:inline-block;min-width:28px;padding:2px 8px;border-radius:999px;background:var(--acc);color:#fff;font-size:15px;text-align:center;vertical-align:middle}
+.cnt.warn{background:#c2410c}
+.day.off{opacity:.45;box-shadow:none}
+.star{color:var(--llena);font-size:34px;line-height:1;flex:none}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:999px;font:600 16px Fredoka;z-index:30;max-width:calc(100% - 32px);text-align:center}
 .sheet{background:#fff;color:#222;border-radius:16px;padding:16px;overflow-x:auto}
 .sh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:3px solid #ff7a2f;padding-bottom:6px;margin-bottom:10px;gap:10px;flex-wrap:wrap}
@@ -158,6 +166,8 @@ function items(c){return c.g?c.i.concat((CU.add[c.g]||[]).map(n=>[n,badge(n,c.h)
 let L=ld("isaLS",{});for(const d in L)CATS.forEach(c=>{if(L[d][c.k]&&!items(c).some(x=>x[0]==L[d][c.k]))delete L[d][c.k]});
 let W={des:ld("isaD2",{}),cena:ld("isaC2",{})};
 let P=ld("isaPant",null);
+let SEL=ld("isaSel",{});
+let NOCHES=ld("isaNoches",["Viernes","Domingo"]);
 const app=document.getElementById("app");
 const has=n=>!!P&&P.have.includes(n)&&!CU.rm.includes(n);
 const req=x=>x[3]||[x[0]];
@@ -212,13 +222,65 @@ function zona(){
   app.innerHTML=hdr("Para papás")+`<div class="pp">
   <div class="zl">
     <button class="zi" onclick="papas()">Despensa<small>${P?'Revisada el '+fecha(P.at):'Todavía no la revisan'}</small></button>
+    <button class="zi" onclick="presel()">Opciones de la semana<small>De 4 a 6 por grupo; Isa escoge entre esas</small></button>
+    <button class="zi" onclick="cenasPapas()">Cenas de la semana<small>Las noches que deciden ustedes</small></button>
     <button class="zi" onclick="imprimir()">Imprimir calendario<small>Hoja carta horizontal o PDF</small></button>
   </div>
+  <div class="grp"><div class="gh"><h2>Noches de Isa</h2></div><p class="lead" style="font-size:16px">Escojan 1 o 2 noches fijas. Esas cenas las escoge Isa.</p><div class="chips">
+    ${D.map(d=>`<button class="chip${NOCHES.includes(d)?' on':''}" onclick="togNoche('${d}')">${d}</button>`).join("")}</div></div>
   <div class="grp"><div class="gh"><h2>Rifar la semana</h2></div><div class="chips">
-    <button class="chip" onclick="rifa('des')">Rifar desayunos</button><button class="chip" onclick="rifa('cena')">Rifar cenas</button></div></div>
+    <button class="chip" onclick="rifa('des')">Rifar desayunos</button><button class="chip" onclick="rifa('cena')">Rifar cenas de papás</button></div></div>
   <div class="grp"><div class="gh"><h2>Borrar la semana</h2></div><div class="chips">
     <button class="chip" onclick="borra('L')">Lonches</button><button class="chip" onclick="borra('des')">Desayunos</button><button class="chip" onclick="borra('cena')">Cenas</button></div></div>
   </div>`;
+  window.scrollTo(0,0);
+}
+function togNoche(d){
+  if(NOCHES.includes(d)){if(NOCHES.length<2){toast("Isa necesita al menos una noche");return}NOCHES=NOCHES.filter(x=>x!=d)}
+  else{NOCHES.push(d);if(NOCHES.length>2)NOCHES.shift()}
+  NOCHES.sort((a,b)=>D.indexOf(a)-D.indexOf(b));sv("isaNoches",NOCHES);
+  const y=window.scrollY;zona();window.scrollTo(0,y);
+}
+
+/* ---------- Preselección semanal ---------- */
+function grupos(){return CATS.map(c=>({k:c.k,t:"Lonche: "+c.t.toLowerCase(),l:items(c)})).concat([{k:"des",t:"Desayunos",l:lst("des")},{k:"cena",t:"Cenas de Isa",l:lst("cena")}])}
+const premio=x=>x[2]=="de premio";
+function guardaSel(){sv("isaSel",SEL)}
+// Lo que Isa puede escoger: lo preseleccionado que sí hay; si no queda nada, todo lo que hay.
+function paraIsa(k,list){const av=list.filter(ok),s=SEL[k]||[],f=av.filter(x=>s.includes(x[0]));return f.length?f:av}
+// Sugiere hasta 5 al azar con lo que hay (sin premios). Si ya hay de 4 a 6 válidas, las respeta.
+function sugiere(k,list,nuevas){
+  const prev=SEL[k]||[],av=list.filter(x=>ok(x)&&!premio(x)).map(x=>x[0]);
+  const keep=nuevas?[]:prev.filter(n=>list.some(x=>x[0]==n&&ok(x)));
+  if(!nuevas&&keep.length>=4){SEL[k]=keep.slice(0,6);return}
+  const pool=av.filter(n=>!keep.includes(n)).sort(()=>Math.random()-.5);
+  if(nuevas)pool.sort((a,b)=>prev.includes(a)-prev.includes(b));
+  while(keep.length<5&&pool.length)keep.push(pool.shift());
+  SEL[k]=keep;
+}
+function presel(){
+  app.innerHTML=hdr("Opciones de la semana","zona()")+`<div class="pp" id="presel"><p class="lead">La app sugiere de 4 a 6 por grupo con lo que hay. Toquen para quitar o agregar. Isa solo verá las marcadas.</p>
+  ${grupos().map(g=>{const av=g.l.filter(ok),s=SEL[g.k]||[],n=av.filter(x=>s.includes(x[0])).length;
+    return `<div class="grp" data-k="${g.k}"><div class="gh"><h2>${g.t} <span class="cnt${n<Math.min(4,av.length)||n>6?' warn':''}">${n}</span></h2>${av.length>1?`<button onclick="otrasSug('${g.k}')">Sugerir otras</button>`:''}</div>
+    ${av.length?`<div class="opts">${av.map(x=>`<button class="opt${s.includes(x[0])?' on':''}" onclick="togSel('${g.k}','${js(x[0])}')"><span class="em">${x[1]}</span>${esc(x[0])}</button>`).join("")}</div>`
+    :'<span style="color:var(--soft)">No hay nada en la despensa para esto.</span>'}</div>`}).join("")}
+  <div class="sum"><div>Isa escoge solo entre las marcadas.</div><button class="pill" id="presel-listo" style="background:var(--acc)" onclick="home();window.scrollTo(0,0)">Listo</button></div></div>`;
+}
+function repSel(){const y=window.scrollY;presel();window.scrollTo(0,y)}
+function togSel(k,n){
+  const g=grupos().find(x=>x.k==k),av=g.l.filter(ok).map(x=>x[0]),s=(SEL[k]||[]).filter(x=>av.includes(x));
+  if(s.includes(n))SEL[k]=s.filter(x=>x!=n);
+  else{if(s.length>=6){toast("Máximo 6 por grupo");return}SEL[k]=s.concat(n)}
+  guardaSel();repSel();
+}
+function otrasSug(k){sugiere(k,grupos().find(x=>x.k==k).l,1);guardaSel();repSel()}
+
+/* ---------- Cenas de papás ---------- */
+function cenasPapas(){
+  const w=W.cena,list=lst("cena");
+  app.innerHTML=hdr("Cenas de la semana","zona()")+`<p class="lead" style="color:var(--soft);font-size:17px;margin:0 0 12px">Las noches con estrella las escoge Isa. Toquen cualquier día para escoger ustedes.</p>
+  <div class="days" id="dl">${D.map((d,j)=>{const isa=NOCHES.includes(d);return `<button class="day" onclick="elige('cena',${j},1)"><span class="dn" style="background:${DC[j]}">${d.slice(0,2)}</span><span class="em">${w[d]?find(list,w[d]):'·'}</span><span class="tx" style="flex:1">${d}<small>${esc(w[d]||(isa?'Le toca a Isa':'Sin escoger'))}</small></span>${isa?'<span class="star">★</span>':''}</button>`}).join("")}</div>
+  <div class="row"><button class="pill" style="background:var(--acc)" onclick="rifa('cena');cenasPapas()">Rifar las noches de papás</button></div>`;
   window.scrollTo(0,0);
 }
 function borra(k){
@@ -246,7 +308,7 @@ function drawPapas(){
     ?`<span class="chip ed ${draft.has(n)?'on':''}">${esc(n)}<button class="x" onclick="quita('${js(g)}','${js(n)}')" aria-label="Quitar ${esc(n)}">×</button></span>`
     :`<button class="chip ${draft.has(n)?'on':''}" onclick="tog('${js(n)}')">${esc(n)}</button>`).join("")||'<span style="color:var(--soft)">Vacío</span>'}</div></div>`).join("")}
   ${editing?'':`<div class="sum"><div><b>Con esto, Isa puede escoger:</b><br>Lonche: ${nL[0]} frutas, ${nL[1]} verduras, ${nL[2]} para llenar, ${nL[3]} snacks<br>${nD} desayunos y ${nC} cenas</div>
-  <button class="pill" style="background:var(--acc)" onclick="guardaP()">Listo, ¡a escoger!</button></div>`}</div>`;
+  <button class="pill" style="background:var(--acc)" onclick="guardaP()">Guardar y seguir</button></div>`}</div>`;
 }
 function tog(n){draft.has(n)?draft.delete(n):draft.add(n);redraw()}
 function todo(gi,on){pantry()[gi][1].forEach(n=>on?draft.add(n):draft.delete(n));redraw()}
@@ -261,7 +323,7 @@ function agrega(gi){
   else if(!all.includes(n.toLowerCase())){(CU.add[g]=CU.add[g]||[]).push(n)}
   draft.add(n);guardaCU();adding=-1;redraw();
 }
-function guardaP(){P={have:[...draft],at:iso(new Date())};sv("isaPant",P);home();window.scrollTo(0,0)}
+function guardaP(){P={have:[...draft],at:iso(new Date())};sv("isaPant",P);grupos().forEach(g=>sugiere(g.k,g.l,0));guardaSel();presel();window.scrollTo(0,0)}
 
 /* ---------- Imprimir ---------- */
 function lunesSemana(){const t=new Date();t.setHours(12);const dw=(t.getDay()+6)%7;if(dw>=5)t.setDate(t.getDate()+7-dw);else t.setDate(t.getDate()-dw);return t}
@@ -296,7 +358,7 @@ function semL(){
 }
 function lonche(s){
   if(s>=CATS.length)return lista();
-  const c=CATS[s],d=LD[cur],x=L[d]||(L[d]={}),av=items(c).filter(ok);
+  const c=CATS[s],d=LD[cur],x=L[d]||(L[d]={}),av=paraIsa(c.k,items(c));
   const dots=CATS.map(y=>`<div class="dot ${x[y.k]?'on':''}" style="border-color:${y.c}">${x[y.k]?find(items(y),x[y.k]):''}</div>`).join("");
   app.innerHTML=hdr(`<span style="color:${DC[cur]}">Lonche del ${d}</span>`,"semL()")+`<div class="dots">${dots}</div><div class="ask" style="color:${c.c}">${c.q}</div>
   ${av.length?`<div class="grid">${av.map(([n,e,t])=>`<div class="card ${x[c.k]==n?'sel':''}" style="${x[c.k]==n?'border-color:'+c.c:''}" onclick="pick(${s},'${js(n)}',this)"><span class="em">${e}</span><span class="nm">${esc(n)}</span>${t?`<span class="tg">${t}</span>`:''}</div>`).join("")}</div>`
@@ -313,25 +375,32 @@ function lista(){
   <button class="pill" style="background:var(--sky)" onclick="semL()">Ver mi semana</button></div></div>`;
   yay();say("¡Tu lonche del "+d+" está listo!"+(nx>=0?" Ahora vamos con el "+LD[nx]:""));
 }
-function rnd(c){const o=items(c).filter(x=>x[2]!="de premio"&&ok(x));return o.length?o[Math.floor(Math.random()*o.length)][0]:null}
+function rnd(c){const o=paraIsa(c.k,items(c)).filter(x=>!premio(x));return o.length?o[Math.floor(Math.random()*o.length)][0]:null}
 function sorpSem(){LD.forEach(d=>{L[d]={};CATS.forEach(c=>{const v=rnd(c);if(v)L[d][c.k]=v})});guardaL();semL();document.getElementById("dl").classList.add("spin");yay();say("¡Sorpresa! Ya quedaron tus lonches de toda la semana")}
 
 /* ---------- Desayunos y cenas ---------- */
 const lst=m=>m=="des"?DES:CEN;
 function semana(m){
   const list=lst(m),w=W[m];
-  app.innerHTML=hdr(m=="des"?"Desayunos":"Cenas")+`<div class="days" id="dl">${D.map((d,j)=>`<button class="day" onclick="say('${d}');elige('${m}',${j})"><span class="dn" style="background:${DC[j]}">${d.slice(0,2)}</span><span class="em">${w[d]?find(list,w[d]):'❔'}</span><span class="tx">${d}<small>${w[d]||'Toca para escoger'}</small></span></button>`).join("")}</div>`;
+  app.innerHTML=hdr(m=="des"?"Desayunos":"Cenas")+`<div class="days" id="dl">${D.map((d,j)=>{const off=m=="cena"&&!NOCHES.includes(d);
+    return `<button class="day${off?' off':''}" onclick="${off?"say('Esta noche escogen papá y mamá')":`say('${d}');elige('${m}',${j})`}"><span class="dn" style="background:${DC[j]}">${d.slice(0,2)}</span><span class="em">${w[d]?find(list,w[d]):(off?'·':'❔')}</span><span class="tx" style="flex:1">${d}<small>${esc(w[d]||(off?'Escogen papá y mamá':'Toca para escoger'))}</small></span>${m=="cena"&&!off?'<span class="star">★</span>':''}</button>`}).join("")}</div>`;
 }
-function elige(m,j){
-  const av=lst(m).filter(ok),d=D[j],w=W[m];
-  app.innerHTML=hdr(`<span style="color:${DC[j]}">${d}</span>`,`semana('${m}')`)+`<div class="ask">${m=="des"?"¿Qué desayunamos?":"¿Qué cenamos?"}</div>
-  ${av.length?`<div class="grid">${av.map(([n,e])=>`<div class="card ${w[d]==n?'sel':''}" style="${w[d]==n?'border-color:'+DC[j]:''}" onclick="setDia('${m}',${j},'${n}',this)"><span class="em">${e}</span><span class="nm">${n}</span></div>`).join("")}</div>`:nada()+`</div>`}`;
-  say(av.length?(m=="des"?"¿Qué desayunamos el "+d+"?":"¿Qué cenamos el "+d+"?"):"No hay nada en casa para esto");
+// pp=1: lo escogen los papás (ven todo lo que hay, sin voz)
+function elige(m,j,pp){
+  const av=pp?lst(m).filter(ok):paraIsa(m,lst(m)),d=D[j],w=W[m];
+  app.innerHTML=hdr(`<span style="color:${DC[j]}">${d}</span>`,pp?"cenasPapas()":`semana('${m}')`)+`<div class="ask">${m=="des"?"¿Qué desayunamos?":"¿Qué cenamos?"}</div>
+  ${av.length?`<div class="grid">${av.map(([n,e])=>`<div class="card ${w[d]==n?'sel':''}" style="${w[d]==n?'border-color:'+DC[j]:''}" onclick="setDia('${m}',${j},'${js(n)}',this,${pp?1:0})"><span class="em">${e}</span><span class="nm">${esc(n)}</span></div>`).join("")}</div>`:nada()+`</div>`}`;
+  if(!pp)say(av.length?(m=="des"?"¿Qué desayunamos el "+d+"?":"¿Qué cenamos el "+d+"?"):"No hay nada en casa para esto");
+  window.scrollTo(0,0);
 }
-function setDia(m,j,n,el){W[m][D[j]]=n;guarda(m);say(n);el.classList.add("sel");el.style.borderColor=DC[j];setTimeout(()=>semana(m),650)}
+function setDia(m,j,n,el,pp){W[m][D[j]]=n;guarda(m);if(!pp)say(n);el.classList.add("sel");el.style.borderColor=DC[j];setTimeout(()=>pp?cenasPapas():semana(m),pp?250:650)}
 function guarda(m){sv(m=="des"?"isaD2":"isaC2",W[m])}
-function rifa(m){const av=lst(m).filter(ok);if(!av.length){toast("No hay nada en la despensa para esto");return}
-  let p=[];while(p.length<7)p=p.concat([...av].sort(()=>Math.random()-.5));
-  D.forEach((d,i)=>W[m][d]=p[i][0]);guarda(m);yay();toast(m=="des"?"Listo, desayunos rifados":"Listo, cenas rifadas")}
+// Desayunos: los 7 días entre lo preseleccionado. Cenas: solo las noches de papás, entre todo lo que hay.
+function rifa(m){
+  const av=(m=="des"?paraIsa("des",lst("des")):lst("cena").filter(ok)).filter(x=>!premio(x));
+  if(!av.length){toast("No hay nada en la despensa para esto");return}
+  const dias=m=="des"?D:D.filter(d=>!NOCHES.includes(d));
+  let p=[];while(p.length<dias.length)p=p.concat([...av].sort(()=>Math.random()-.5));
+  dias.forEach((d,i)=>W[m][d]=p[i][0]);guarda(m);yay();toast(m=="des"?"Listo, desayunos rifados":"Listo, cenas de papás rifadas")}
 home();
 </script></body></html>
