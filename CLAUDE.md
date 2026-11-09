@@ -2,7 +2,9 @@
 
 Web app de una sola página (`index.html`) para que Isa, hija de Raúl (casi 5 años, todavía no lee), escoja su lonche escolar de lunes a viernes y los desayunos y cenas de la semana. Los papás primero marcan qué hay en el refri y la despensa, y la app solo le muestra a Isa lo que se puede preparar con eso.
 
-Versión publicada: https://claude.ai/artifact/CAuzyGAPypALPkocE7x1WA (artifact de Claude; este repo es ahora la fuente de verdad).
+Versión publicada (PWA): https://raulsalasa.github.io/menu-isa/ (GitHub Pages, repo público raulsalasa/menu-isa, rama main). Cada push a main se publica solo en 1 o 2 minutos.
+Versión vieja: https://claude.ai/artifact/CAuzyGAPypALPkocE7x1WA (artifact de Claude; ya no se actualiza).
+El repo es público: no subas fotos, datos reales de la familia ni llaves. Las fotos y las elecciones viven solo en el aparato.
 
 ## Sobre Raúl (el dueño)
 - No es programador: escribe el código por él, no le expliques cómo hacerlo.
@@ -84,5 +86,5 @@ Versión publicada: https://claude.ai/artifact/CAuzyGAPypALPkocE7x1WA (artifact 
 
 ## Cómo probar
 Abre `index.html` en el navegador. Prueba automática: `tests/prueba.cjs` (Playwright, Chromium). Corre en celular claro y oscuro y en tablet horizontal: candado, despensa, foto, preselección, lonche completo, rifa de cenas y noches de Isa. Guarda screenshots en `shots/` (ignorada por git).
-`tests/pwa.cjs` levanta un servidor local (python) y revisa el service worker, que no haya peticiones a terceros, el manifest y que abra sin internet.
+`tests/pwa.cjs` levanta un servidor local (python) y revisa el service worker, que no haya peticiones a terceros, el manifest y que abra sin internet. Con `BASE=https://raulsalasa.github.io/menu-isa/` prueba la versión publicada.
 Playwright no está instalado en el repo: instálalo en una carpeta temporal y corre `NODE_PATH=<esa carpeta>/node_modules node tests/prueba.cjs`. Revisa los screenshots antes de entregar. Haz un commit por cada punto terminado.

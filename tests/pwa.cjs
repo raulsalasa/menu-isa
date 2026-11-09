@@ -4,12 +4,12 @@ const { chromium } = require("playwright");
 const { spawn } = require("child_process");
 const path = require("path");
 
-const PORT = 8765, BASE = `http://localhost:${PORT}/`;
+const PORT = 8765, BASE = process.env.BASE || `http://localhost:${PORT}/`;
 let fallas = 0;
 const ok = (c, m) => { console.log((c ? "  ok  " : "  MAL ") + m); if (!c) fallas++; };
 
 (async () => {
-  const srv = spawn("python", ["-m", "http.server", String(PORT)], { cwd: path.resolve(__dirname, ".."), stdio: "ignore" });
+  const srv = process.env.BASE ? { kill() {} } : spawn("python", ["-m", "http.server", String(PORT)], { cwd: path.resolve(__dirname, ".."), stdio: "ignore" });
   await new Promise(r => setTimeout(r, 1200));
   const browser = await chromium.launch();
   try {
